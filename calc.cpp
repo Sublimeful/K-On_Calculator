@@ -150,7 +150,10 @@ void Calc::pressed(int button_type)
         }
         else if(button_type == 12)
         {
-            this->ui->Number->display(this->get_answer());
+            QString ans = this->get_answer();
+            this->ui->Number->setDigitCount(5);
+            if(ans.length() > 5) this->ui->Number->setDigitCount(ans.length());
+            this->ui->Number->display(ans);
         }
     }
     this->ui->Equation->setText(this->equation);
