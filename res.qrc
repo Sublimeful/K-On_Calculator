@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="Images">
+    <file>img/k-on!.jpg</file>
+    <file>img/lcd_display.jpg</file>
+  </qresource>
+</RCC>
