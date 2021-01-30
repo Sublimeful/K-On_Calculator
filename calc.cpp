@@ -3,41 +3,71 @@
 #include <QSignalMapper>
 #include <QRegularExpression>
 
+bool Calc::isOperand(QChar c)
+{
+        return c == '/' || c == '*' || c == '-' ||
+           c == '+' || c == '%';
+}
+
 QString Calc::get_answer() {
     QString equation = this->equation;
-    if(equation == "") return "0";
-    if(!equation.at(0).isDigit() || !equation.at(equation.size()-1).isDigit()) return "ERROR";
+    if(equation == "") return "0"; /* if equation is blank, then return 0 */
+    if(isOperand(equation.at(0)) || isOperand(equation.at(equation.size()-1))) return "ERROR"; /* if first or last char
+                                                                                                 is an operator return error */
     bool equationIsNumber = true;
     for(int i=0; i < equation.size(); ++i)
     {
-        if(equation.at(i) == '.' && (!equation.at(i-1).isDigit() || !equation.at(i+1).isDigit())) return "ERROR";
-        if(equation.at(i) == '/' || equation.at(i) == '*' || equation.at(i) == '-' ||
-           equation.at(i) == '+' || equation.at(i) == '%') equationIsNumber = false;
-
-    } /* checks if equation is empty, or first or last is digit, and valid decimals */
-    if(equationIsNumber) return QString::number(equation.toDouble());
+        // if period is at the end of the equation, or operand/period is to the right of period, then return error
+        if(equation.at(i) == '.' && ((i+1) == equation.size() || isOperand(equation.at(i+1)) || equation.at(i+1) == '.')) return "ERROR";
+        // if equation has an operand, then the equation is not a number
+        if(isOperand(equation.at(i))) equationIsNumber = false;
+    }
+    if(equationIsNumber) return QString::number(equation.toDouble()); // return converted double if number
     QVector<double> nums;
     QVector<QChar> operands;
     for(int i=0; i < equation.size(); ++i)
     {
-        if(equation.at(i) == '/' || equation.at(i) == '*' || equation.at(i) == '-' ||
-           equation.at(i) == '+' || equation.at(i) == '%')
+        if(isOperand(equation.at(i)))
         {
-            if(equation.at(i) == equation.at(i+1)) return "ERROR"; //returns error if more than one op together
-            //target first occurance of operation
+            if(equation.at(i) == equation.at(i+1)) return "ERROR"; //returns error if operand to the right of operand
+            //targets first occurance of operation because num size is 0(no number added yet)
             if(nums.size() == 0)
             {
+                //add first number
                 nums.push_back(equation.left(i).toDouble());
             }
-
+            //matches a valid number (regex)
             QString right = equation.right(equation.size() - i);
             QRegularExpression re("\\d*(\\d(?=[/*\\-+%])|$|\\.)\\d*");
             QRegularExpressionMatch match = re.match(right);
 
+            //adds the number and operand to vector
             nums.push_back(match.captured().toDouble());
             operands.push_back(equation.at(i));
         }
     }
+    /*
+     * Order of Operations:
+     * first targets the * | / | % operands
+     * numbers that operand modifies has operation done with the
+     * next number in the vector, and number is set to 0
+     *
+     * Ex:
+     * Before Operation: {1,2,3,4}
+     *                    {+,*,-}
+     * After Operation:  {1,0,6,4}
+     *                    {+,*,-}
+     *
+     * At the end, once * | / | % is done, another pass is done to add and subtract numbers
+     * from left to right, making sure not to interfere with the * | / | % operands
+     *
+     * First Operation: {1,0,6,4}
+     *                    {+,*,-}
+     * Next Operation: {1,0,7,4} <<- index 2 is added with 0 because * operand occupies the first index
+     *                  {+,*,-} <<- plus operation is done
+     * Last Operation: {1,0,7,3} <<- index 3 is set to index 2 - index 3
+     *                  {+,*,-} <<- subtract operation is done
+    */
     for(int i=0; i < operands.size(); ++i)
     {
         if(operands[i] == '*')
@@ -77,6 +107,7 @@ QString Calc::get_answer() {
             }
         }
     }
+    //return last number in vector which should be answer(?)
     return QString::number(nums[nums.size()-1]);
 };
 

@@ -16,6 +16,7 @@ class Calc : public QMainWindow
     Q_OBJECT
 
 public:
+    static bool isOperand(QChar c);
     QString equation = "";
     QString get_answer();
     Calc(QWidget *parent = nullptr);
