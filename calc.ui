@@ -66,7 +66,7 @@
      <enum>QLCDNumber::Filled</enum>
     </property>
     <property name="value" stdset="0">
-     <double>1.230000000000000</double>
+     <double>0.000000000000000</double>
     </property>
    </widget>
    <widget class="QLabel" name="background">
@@ -106,7 +106,7 @@
       <x>16</x>
       <y>172</y>
       <width>290</width>
-      <height>340</height>
+      <height>346</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
